@@ -1,85 +1,55 @@
-const path = require('path');
+const { createRemoteFileNode } = require("gatsby-source-filesystem");
 
-exports.createPages = async ({ graphql, actions }) => {
-  const { createPage, reject } = actions;
-  const blogRes = await graphql(`
-    {
-      allMarkdownRemark(
-        filter: { frontmatter: { type: { eq: "blogPost" } } }
-        sort: { fields: [frontmatter___date], order: DESC }
-      ) {
-        edges {
-          node {
-            id
-            frontmatter {
-              slug
-              image
-            }
-          }
-        }
-      }
+exports.createSchemaCustomization = ({ actions }) => {
+  const { createTypes } = actions;
+
+  createTypes(`
+    type DevArticles implements Node {
+      id: ID!
+      article: Article
+      featuredImg: File @link(from: "featuredImg___NODE")
+    }
+
+    type Article {
+      url: String
+      title: String
+      tags: [String]
+      description: String
+      cover_image: String
+      social_image: String
+      published_at(
+        difference: String
+        formatString: String
+        fromNow: Boolean
+        locale: String
+      ): Date
+      positive_reactions_count: Int
     }
   `);
+};
 
-  if (blogRes.errors) {
-    reject(blogRes.errors);
-  }
-
-  const blogPostTemplate = path.resolve('./src/templates/blogPost.js');
-
-  blogRes.data.allMarkdownRemark.edges.forEach(({ node }) => {
-    createPage({
-      path: `blog/${node.frontmatter.slug}`,
-      component: blogPostTemplate,
-      context: {
-        id: node.id,
-        slug: node.frontmatter.slug,
-        // relative filepath for blogPost.js query
-        imgUrl: `content/blog-posts/${node.frontmatter.image}`,
-      },
+exports.onCreateNode = async ({
+  node,
+  actions: { createNode },
+  store,
+  cache,
+  createNodeId,
+}) => {
+  if (
+    node.internal.type === "DevArticles" &&
+    (node.article.cover_image !== null || node.article.social_image !== null)
+  ) {
+    let fileNode = await createRemoteFileNode({
+      url: node.article.cover_image || node.article.social_image,
+      parentNodeId: node.id,
+      createNode,
+      createNodeId,
+      cache,
+      store,
     });
-  });
 
-  // ============================================================
-
-  const tutorialRes = await graphql(`
-    {
-      allMarkdownRemark(
-        filter: { frontmatter: { type: { eq: "tutorial" } } }
-        sort: { fields: [frontmatter___date], order: DESC }
-      ) {
-        edges {
-          node {
-            id
-            frontmatter {
-              slug
-              image
-            }
-          }
-        }
-      }
+    if (fileNode) {
+      node.featuredImg___NODE = fileNode.id;
     }
-  `);
-
-  if (tutorialRes.errors) {
-    reject(tutorialRes.errors);
   }
-
-  // reuse blogPostTemplate from above
-  // const blogPostTemplate = path.resolve('./src/templates/blogPost.js');
-
-  tutorialRes.data.allMarkdownRemark.edges.forEach(({ node }) => {
-    createPage({
-      path: `tutorials/${node.frontmatter.slug}`,
-      component: blogPostTemplate,
-      context: {
-        id: node.id,
-        slug: node.frontmatter.slug,
-        // relative filepath for blogPost.js query
-        imgUrl: `content/tutorials/${node.frontmatter.image}`,
-      },
-    });
-  });
-
-  return;
 };

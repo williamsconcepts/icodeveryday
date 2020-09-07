@@ -1,190 +1,58 @@
-import React from 'react';
-import { graphql } from 'gatsby';
-import PropTypes from 'prop-types';
-import Layout from '../templates/layout';
-import { IndexPageWrapper } from '../styles/index/IndexStyles';
-import BlogListing from '../components/index/BlogListing';
+import React from "react";
+import styles from "./index.module.css";
+import Footer from "../sections/Footer";
+import Wrapper from "../components/Wrapper";
+import AboutMe from "../sections/AboutMe";
+import Achievements from "../sections/Achievements";
+import Blog from "../sections/Blog";
+import Certifications from "../sections/Certifications";
+import Contact from "../sections/Contact";
+import Design from "../sections/Design";
+import Education from "../sections/Education";
+import Hero from "../sections/Hero";
+import Languages from "../sections/Languages";
+import Music from "../sections/Music";
+import Philanthropy from "../sections/Philanthropy";
+import Photography from "../sections/Photography";
+import Projects from "../sections/Projects";
+import Resume from "../sections/Resume";
+import Skills from "../sections/Skills";
+import Work from "../sections/Work";
 
-import Logo from '../images/svg/LogoSVG';
-import Twitter from '../images/svg/TwitterSVG';
-import Instagram from '../images/svg/InstagramSVG';
-import Linkedin from '../images/svg/LinkedinSVG';
-import Github from '../images/svg/GithubSVG';
-import Arrow from '../images/svg/DownArrowSVG';
-import Resume from '../images/svg/ResumeSVG';
-
-const Index = ({ path, data }) => {
-  const {
-    miniBio,
-    twitterURL,
-    instagramURL,
-    githubURL,
-    linkedinURL,
-  } = data.me.childMarkdownRemark.frontmatter;
-
-  const seo = {
-    page: 'index',
-    title: '',
-    description: `${miniBio}`,
-    url: 'https://boobae.blog',
-    imgUrl: `${data.pageImg.publicURL}`,
-    imgAlt:
-      'boobae logo, twitter, instagram, facebook, github icons with @williamsconcepts username',
-    breadcrumbs: [],
-  };
-
+const IndexPage = () => {
   return (
-    <Layout seo={seo} path={path}>
-      <IndexPageWrapper>
-        <div className="indexIntro">
-        
-          <h1 className="headline">
-          
-          <Logo />
-            {/* - HEAR IT
-            <br />- READ IT
-            <br />- SHARE IT
-            <br />- LIVE IT */}
-          </h1>
-
-          
-
-          
-
-          <ul className="introSocialLinks">
-            <li>
-              <a
-                target="_blank"
-                href={twitterURL}
-                rel="noopener"
-                aria-label="My twitter profile"
-              >
-                <Twitter />
-              </a>
-            </li>
-            <li>
-              <a
-                target="_blank"
-                href={instagramURL}
-                rel="noopener"
-                aria-label="My Instagram page"
-              >
-                <Instagram />
-              </a>
-            </li>
-            <li>
-              <a
-                target="_blank"
-                href={linkedinURL}
-                rel="noopener"
-                aria-label="My linkedin profile"
-              >
-                <Linkedin />
-              </a>
-            </li>
-            <li>
-              <a
-                target="_blank"
-                href={githubURL}
-                rel="noopener"
-                aria-label="My Github page"
-              >
-                <Github />
-              </a>
-            </li>
-            <li>
-              <a
-                target="_blank"
-                href={data.resume.publicURL}
-                rel="noopener"
-                aria-label="My Resume"
-              >
-                <Resume />
-              </a>
-            </li>
-          </ul>
+    <Wrapper>
+      <div className={`container ${styles.layout}`}>
+        <Hero />
+        <AboutMe />
+        <div className={styles.workEducation}>
+          <Work />
+          <Education />
         </div>
-
-        <div className="downArrowLink">
-          <a
-            href="#recentPublications"
-            aria-label="scroll down to recent publications section"
-            style={{ height: '50px', width: '50px' }}
-          >
-            <Arrow />
-          </a>
+        <Skills />
+        <Projects />
+        <Blog />
+        <Languages />
+        <div className={styles.achievementsCertificationPhilanthropy}>
+          <div>
+            <Achievements />
+          </div>
+          <div>
+            <Certifications />
+          </div>
+          <div>
+            <Philanthropy />
+          </div>
         </div>
-
-        {/* Blog posts */}
-        <div id="recentPublications">
-          <h1>All Recent Tips</h1>
-
-          {data.allMarkdownRemark.edges.map(({ node }) => (
-            <BlogListing key={node.id} data={node} />
-          ))}
-        </div>
-      </IndexPageWrapper>
-    </Layout>
+        <Photography />
+        <Music />
+        <Design />
+        <Resume />
+        <Contact />
+        <Footer />
+      </div>
+    </Wrapper>
   );
 };
 
-Index.propTypes = {
-  path: PropTypes.string.isRequired,
-  data: PropTypes.object.isRequired,
-};
-
-export default Index;
-
-export const INDEX_PAGE_QUERY = graphql`
-  query INDEX_PAGE_QUERY {
-    # all blog posts, sorted by most recent
-    allMarkdownRemark(
-      sort: { fields: frontmatter___date, order: DESC }
-      filter: { frontmatter: { type: { in: ["blogPost", "tutorial"] } } }
-    ) {
-      edges {
-        node {
-          id
-          frontmatter {
-            date
-            title
-            slug
-            subtitle
-            tags
-            type
-          }
-          excerpt(pruneLength: 300)
-          timeToRead
-        }
-      }
-    }
-
-    # social links from about markdown file
-    me: file(relativePath: { eq: "me.md" }) {
-      childMarkdownRemark {
-        id
-        frontmatter {
-          email
-          phone
-          handle
-          miniBio
-          username
-          twitterURL
-          instagramURL
-          githubURL
-          facebookURL
-          snapchat
-          linkedinURL
-        }
-      }
-    }
-
-    pageImg: file(relativePath: { eq: "page-meta-img.jpg" }) {
-      publicURL # used for SEO
-    }
-
-    resume: file(relativePath: { eq: "content/resume.pdf" }) {
-      publicURL
-    }
-  }
-`;
+export default IndexPage;

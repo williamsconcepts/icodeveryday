@@ -1,10 +1,16 @@
-import React from 'react';
-import ThemeContextWrapper from './src/utils/ThemeContext';
+import React from "react";
+import PropTypes from "prop-types";
 
-// provide theme state to entire app
+import "./src/css/tailwind.css";
+import "./src/css/animate.css";
+import "./src/css/global.css";
+
+import { ThemeProvider } from "./src/context/ThemeContext";
+
 export const wrapRootElement = ({ element }) => (
-  <ThemeContextWrapper>{element}</ThemeContextWrapper>
+  <ThemeProvider>{element}</ThemeProvider>
 );
 
-// ? primsjs stuff
-require('prismjs/themes/prism-tomorrow.css');
+wrapRootElement.propTypes = {
+  element: PropTypes.node.isRequired,
+};

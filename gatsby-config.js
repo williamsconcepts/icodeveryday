@@ -1,127 +1,129 @@
-const path = require('path');
+const path = require(`path`);
+const resolveConfig = require(`tailwindcss/resolveConfig`);
+const tailwindConfig = require(`./tailwind.config.js`);
+const fullConfig = resolveConfig(tailwindConfig);
+require(`dotenv`).config({ path: `.env` });
 
 module.exports = {
   siteMetadata: {
-    title: 'BOOBAE',
-    siteUrl: 'https://boobae.blog',
+    title: `Amruth Pillai's Resume on the Web`,
+    description: `Everyone needs their own little spot on the interwebs, and this is mine. Welcome to my resume, on the web!`,
+    author: `Amruth Pillai`,
+    siteUrl: `https://amruthpillai.com`,
   },
-
-  pathPrefix: '/blog',
-  pathPrefix: '/tutorials',
-
   plugins: [
     {
-      resolve: 'gatsby-plugin-manifest',
+      resolve: `gatsby-plugin-canonical-urls`,
       options: {
-        name: 'Daily Self-improvement Tips',
-        short_name: 'Daily Tips',
-        start_url: '/',
-        background_color: '#f7f7f7',
-        theme_color: '#f7f7f7',
-        lang: 'en',
-        // Enables "Add to Homescreen" prompt and disables browser UI (including back button)
-        // see https://developers.google.com/web/fundamentals/web-app-manifest/#display
-        display: 'standalone',
-        icon: path.join(__dirname, 'src', 'images', 'favicon.png'), // This path is relative to the root of the site.
+        siteUrl: `https://amruthpillai.com`,
       },
     },
     {
-      resolve: 'gatsby-plugin-styled-components',
+      resolve: `gatsby-plugin-google-analytics`,
       options: {
-        // Add any options here
+        trackingId: process.env.GA_TRACKING_ID,
+      },
+    },
+    `gatsby-plugin-sitemap`,
+    {
+      resolve: `gatsby-plugin-robots-txt`,
+      options: {
+        host: `https://amruthpillai.com`,
+        sitemap: `https://amruthpillai.com/sitemap.xml`,
+        policy: [{ userAgent: `*`, allow: `/` }],
+      },
+    },
+    `gatsby-plugin-eslint`,
+    `gatsby-plugin-react-helmet`,
+    {
+      resolve: `gatsby-plugin-manifest`,
+      options: {
+        name: `Amruth Pillai's Resume on the Web`,
+        short_name: `Resume on the Web`,
+        start_url: `/`,
+        background_color: fullConfig.theme.colors.white,
+        theme_color: fullConfig.theme.colors.white,
+        display: `standalone`,
+        icon: `src/images/icon.png`,
+        cache_busting_mode: `none`,
       },
     },
     {
-      resolve: 'gatsby-source-filesystem',
+      resolve: `gatsby-plugin-offline`,
       options: {
-        name: 'images',
-        path: path.join(__dirname, 'src', 'images'),
-      },
-    },
-
-    {
-      resolve: 'gatsby-source-filesystem',
-      options: {
-        name: 'images',
-        path: path.join(__dirname, 'content'),
+        workboxConfig: {
+          globPatterns: [`**/*`],
+        },
       },
     },
     {
-      resolve: 'gatsby-plugin-google-analytics',
+      resolve: `gatsby-plugin-google-fonts`,
       options: {
-        trackingId: 'UA-130258530-1',
-        head: false,
-        anonymize: true,
-        respectDNT: true,
-        // Avoids sending pageview hits from custom paths
-        exclude: [],
-        // Enables Google Optimize using your container Id
-        // optimizeId: `YOUR_GOOGLE_OPTIMIZE_TRACKING_ID`,
-
-        // Any additional create only fields (optional)
-        sampleRate: 5,
-        siteSpeedSampleRate: 10,
-        // cookieDomain: `boobae.blog`,
+        fonts: [`Fira Sans:400,600`],
+        display: `swap`,
       },
     },
     {
-      resolve: 'gatsby-plugin-typography',
+      resolve: `gatsby-source-dribbble`,
       options: {
-        pathToConfigModule: path.join(__dirname, 'src', 'utils', 'typography'),
+        access_token: process.env.DRIBBBLE_TOKEN,
+      },
+    },
+    `gatsby-transformer-sharp`,
+    `gatsby-plugin-sharp`,
+    {
+      resolve: `gatsby-source-filesystem`,
+      options: {
+        name: `images`,
+        path: path.join(__dirname, `src`, `images`),
       },
     },
     {
-      resolve: 'gatsby-transformer-remark',
+      resolve: `gatsby-source-dev`,
       options: {
-        plugins: [
-          {
-            resolve: 'gatsby-remark-prismjs',
-            options: {
-              classPrefix: 'language-',
-              inlineCodeMarker: null,
-              aliases: {},
-              showLineNumbers: false,
-              noInlineHighlight: false,
-              languageExtensions: [
-                {
-                  language: 'superscript',
-                  extend: 'javascript',
-                  definition: {
-                    superscript_types: /(SuperType)/,
-                  },
-                  insertBefore: {
-                    function: {
-                      superscript_keywords: /(superif|superelse)/,
-                    },
-                  },
-                },
-              ],
-              prompt: {
-                user: 'root',
-                host: 'localhost',
-                global: false,
-              },
-            },
-          },
+        username: `amruthpillai`,
+      },
+    },
+    `gatsby-transformer-remark`,
+    {
+      resolve: `gatsby-source-filesystem`,
+      options: {
+        name: `markdown`,
+        path: path.join(__dirname, `src`, `markdown`),
+      },
+    },
+    `gatsby-transformer-json`,
+    {
+      resolve: `gatsby-source-filesystem`,
+      options: {
+        name: `data`,
+        path: path.join(__dirname, `src`, `data`),
+      },
+    },
+    {
+      resolve: `gatsby-source-instagram`,
+      options: {
+        username: `279179176`,
+      },
+    },
+    {
+      resolve: `gatsby-plugin-postcss`,
+      options: {
+        postCssPlugins: [
+          require(`tailwindcss`)(tailwindConfig),
+          require(`autoprefixer`),
+          ...(process.env.NODE_ENV === `production`
+            ? [require(`cssnano`)]
+            : []),
         ],
       },
     },
     {
-      resolve: 'gatsby-plugin-robots-txt',
+      resolve: `gatsby-plugin-purgecss`,
       options: {
-        configFile: path.join(
-          __dirname,
-          'src',
-          'utils',
-          'robots-txt.config.js'
-        ),
+        tailwind: true,
+        purgeOnly: [`src/css/tailwind.css`],
       },
     },
-    'gatsby-plugin-sitemap',
-    'gatsby-transformer-sharp',
-    'gatsby-plugin-sharp',
-    'gatsby-plugin-react-helmet',
-    'gatsby-plugin-offline',
-    'gatsby-plugin-lodash',
   ],
 };
